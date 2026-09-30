@@ -188,6 +188,14 @@
   @media (max-width: 900px) { .flow-arrow { display: none; } }
   .tag.lic-in { background: rgba(63,185,80,.15); color: #7ee2a8; }
   .tag.lic-add { background: rgba(210,153,34,.15); color: #e3b341; }
+
+  /* Pre-purchase */
+  .pp-banner { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 18px 0 22px; padding: 14px 18px; border-radius: var(--radius); border: 1px solid rgba(63,185,80,.5); background: linear-gradient(90deg, rgba(63,185,80,.14), rgba(63,185,80,.04)); color: var(--text); text-decoration: none; font-size: .95rem; }
+  .pp-banner:hover { border-color: var(--green); }
+  .pp-badge { background: var(--green); color: #04260f; font-weight: 700; font-size: .8rem; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .pp-go { margin-left: auto; color: #7ee2a8; font-weight: 600; white-space: nowrap; }
+  .pp { margin-top: 56px; padding-top: 40px; border-top: 1px dashed var(--border); scroll-margin-top: 70px; }
+  .ex-controls input[type=number] { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; width: 200px; font-size: .95rem; }
 </style>
 </head>
 <body>
@@ -238,6 +246,11 @@
     </div>
     <p class="src" style="margin-top:10px">Sources: <a href="https://code.claude.com/docs/en/costs">Anthropic, Claude Code costs</a>; GitHub Copilot vs. Claude compete analysis, Sept 2026.</p>
 
+<a class="pp-banner" href="#prepurchase">
+      <span class="pp-badge">Up to 15% off</span>
+      <span><b>Pre-commit to AI credits through Azure</b> and save up to 15%, depending on tier. One-year term.</span>
+      <span class="pp-go">See the savings →</span>
+    </a>
     <a class="btn btn-primary" href="#compare">See the full comparison</a>
     <a class="btn btn-ghost" href="#cost">See the cost model</a>
 
@@ -488,6 +501,41 @@
     <div class="callout">
       Actual savings depend on Customer's model mix, usage volume and contract terms. We recommend a short pilot that tracks token usage by model to size the difference with your own data.
     </div>
+
+    <div id="prepurchase" class="pp">
+      <div class="eyebrow" style="margin-top:0">Pre-purchase plan</div>
+      <h3 style="font-size:1.5rem">Commit up front, save up to 15% on AI credits</h3>
+      <p class="muted">Buy GitHub AI Credits commit units through Azure Reservations. They pay down Copilot AI usage automatically for one year, and the more you commit, the higher the discount tier. <a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/github-ai-credits-pre-purchase-plan">Microsoft Learn</a></p>
+
+      <div class="ex-controls">
+        <label>Expected annual AI credit spend (pay-as-you-go)
+          <input type="number" id="pp-spend" min="0" step="1000" value="100000">
+        </label>
+        <label><span>Discount tier <span class="info" tabindex="0" role="button" aria-label="More info">i<span class="info-tip" role="tooltip">Illustrative. Larger commitments unlock higher tiers, up to 15%. The exact tiers and thresholds are shown in the Azure portal when you buy.</span></span></span><b id="pp-d-val">10%</b>
+          <input type="range" id="pp-d" min="0" max="15" step="1" value="10">
+        </label>
+      </div>
+
+      <div class="ex-result">
+        <div><span class="muted small">Pay-as-you-go</span><b id="pp-payg"></b></div>
+        <div><span class="muted small">With pre-purchase</span><b id="pp-pre" class="good"></b></div>
+        <div><span class="muted small">Saved per year</span><b id="pp-save" class="good"></b></div>
+        <div><span class="muted small">Discount applied</span><b id="pp-rate"></b></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h3>Stack it with smart model routing</h3>
+        <p>Using the worked example above (<span id="pp-mix"></span>), a year of agent work costs:</p>
+        <div class="bars">
+          <div class="bar-row"><span>Claude, list price</span><div class="bar-track"><div class="bar claude" id="pp-b1"></div></div><span class="val" id="pp-v1"></span></div>
+          <div class="bar-row"><span>Copilot, routed</span><div class="bar-track"><div class="bar" id="pp-b2"></div></div><span class="val" id="pp-v2"></span></div>
+          <div class="bar-row"><span>Copilot, routed + pre-purchase</span><div class="bar-track"><div class="bar" style="background:var(--green)" id="pp-b3"></div></div><span class="val" id="pp-v3"></span></div>
+        </div>
+        <p class="small" style="margin-top:10px">Combined saving vs. Claude: <b class="good" id="pp-total"></b></p>
+      </div>
+
+      <p class="src" style="margin-top:12px">The 1-year term renews by default. Unused commit units don't carry over. The pre-purchase discount doesn't combine with other discounts. If you already have a negotiated discount, compare the two. "Up to 15%" is based on the published tier structure (<a href="https://www.schneider.im/microsoft-github-copilot-moves-to-usage-based-billing/">Schneider IT</a>); the exact tiers are shown in the Azure portal. Sources: <a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/github-ai-credits-pre-purchase-plan">Microsoft Learn</a>.</p>
+    </div>
   </div>
 </section>
 
@@ -595,6 +643,7 @@
       <li id="fn-harness">Harness efficiency: The GitHub Blog, "Evaluating performance and efficiency of the GitHub Copilot agentic harness across models and tasks" (2026). Compared against Claude Code on Sonnet 4.6 / Opus 4.7, within run-to-run variance.</li>
       <li>Claude Code usage cost estimate: <a href="https://code.claude.com/docs/en/costs">Anthropic, Claude Code costs</a>.</li>
       <li>Model list prices, per-task cost example, seat credits and platform capabilities: GitHub Copilot vs. Claude compete analysis, 30 September 2026. List prices exclude cache-write charges and don't reflect negotiated discounts.</li>
+      <li>GitHub AI Credits pre-purchase plan: <a href="https://learn.microsoft.com/en-us/azure/cost-management-billing/reservations/github-ai-credits-pre-purchase-plan">Microsoft Learn</a>. "Up to 15%" discount tier: <a href="https://www.schneider.im/microsoft-github-copilot-moves-to-usage-based-billing/">Schneider IT</a>. Exact tiers and thresholds are shown in the Azure portal.</li>
       <li>Claude Fable 5.1 is excluded from cost comparisons. Anthropic retains prompts and outputs for that model by default; zero data retention is available only by approved exemption through Dec 31, 2026.</li>
     </ol>
     <p>Model names, prices and availability current as of September 2026.</p>
@@ -632,6 +681,36 @@
   $('ex-r').addEventListener('input', () => update('r'));
   $('ex-h').addEventListener('input', () => update('h'));
   $('ex-volume').addEventListener('change', () => update());
+  update();
+})();
+</script>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const usd = n => '$' + Math.round(n).toLocaleString('en-US');
+  const claude = [0.253, 0.506, 0.813], copilot = [0.053, 0.190, 0.406];
+  function update() {
+    const spend = Math.max(0, +$('pp-spend').value || 0), d = +$('pp-d').value / 100;
+    $('pp-d-val').textContent = Math.round(d * 100) + '%';
+    $('pp-payg').textContent = usd(spend);
+    $('pp-pre').textContent = usd(spend * (1 - d));
+    $('pp-save').textContent = usd(spend * d);
+    $('pp-rate').textContent = Math.round(d * 100) + '%';
+    const vol = +$('ex-volume').value, r = +$('ex-r').value, h = +$('ex-h').value, st = 100 - r - h;
+    const n = [r, st, h].map(p => vol * p / 100);
+    const c = 12 * n.reduce((a, k, i) => a + k * claude[i], 0);
+    const g = 12 * n.reduce((a, k, i) => a + k * copilot[i], 0);
+    const gp = g * (1 - d);
+    $('pp-mix').textContent = vol.toLocaleString('en-US') + ' tasks/month, ' + r + '% routine, ' + st + '% standard, ' + h + '% hard';
+    $('pp-v1').textContent = usd(c); $('pp-v2').textContent = usd(g); $('pp-v3').textContent = usd(gp);
+    $('pp-b1').style.width = c ? '100%' : '0';
+    $('pp-b2').style.width = c ? (g / c * 100) + '%' : '0';
+    $('pp-b3').style.width = c ? (gp / c * 100) + '%' : '0';
+    $('pp-total').textContent = c ? usd(c - gp) + ' per year (' + Math.round((1 - gp / c) * 100) + '%)' : '$0';
+  }
+  ['pp-spend', 'pp-d', 'ex-r', 'ex-h'].forEach(id => $(id).addEventListener('input', () => setTimeout(update)));
+  $('ex-volume').addEventListener('change', () => setTimeout(update));
   update();
 })();
 </script>
