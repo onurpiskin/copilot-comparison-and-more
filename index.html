@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Copilot vs. Claude | An AI-agnostic approach for Customer</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c2330;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #9da7b3;
+    --accent: #8957e5;
+    --accent-2: #2f81f7;
+    --green: #3fb950;
+    --amber: #d29922;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  a { color: #7ab7ff; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 72px 0; border-top: 1px solid var(--border); }
+  h1, h2, h3 { line-height: 1.2; margin: 0 0 12px; }
+  h1 { font-size: clamp(2.1rem, 4.5vw, 3.3rem); letter-spacing: -0.02em; }
+  h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); letter-spacing: -0.01em; }
+  h3 { font-size: 1.1rem; }
+  p { margin: 0 0 12px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: .78rem; color: var(--accent); font-weight: 600; margin-bottom: 10px; }
+  .lead { font-size: 1.15rem; color: var(--muted); max-width: 760px; }
+  .muted { color: var(--muted); }
+  .small { font-size: .85rem; }
+  .src { font-size: .78rem; color: var(--muted); }
+  .src a { color: var(--muted); }
+
+  /* Nav */
+  nav { position: sticky; top: 0; z-index: 10; background: rgba(13,17,23,.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  nav .brand { font-weight: 700; }
+  nav .brand span { color: var(--accent); }
+  nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; font-size: .9rem; }
+  nav ul a { color: var(--muted); text-decoration: none; }
+  nav ul a:hover { color: var(--text); }
+  @media (max-width: 820px) { nav ul { display: none; } }
+
+  /* Hero */
+  .hero { padding: 96px 0 72px; border-top: none; background: radial-gradient(900px 400px at 15% 0%, rgba(137,87,229,.25), transparent 60%), radial-gradient(700px 400px at 90% 20%, rgba(47,129,247,.18), transparent 60%); }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 30px; }
+  .pill { border: 1px solid var(--border); background: var(--panel); padding: 7px 14px; border-radius: 999px; font-size: .88rem; }
+  .hero h1 .gh { color: #fff; }
+  .hero h1 .vs { color: var(--muted); font-weight: 400; font-size: .7em; padding: 0 .2em; }
+  .hero h1 .cl { color: #e3a57c; }
+  .h1-sub { font-size: 1.35rem; color: var(--text); margin-bottom: 14px; }
+  .vs-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: stretch; margin: 30px 0 8px; }
+  .vs-card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .vs-card.copilot { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(137,87,229,.35), 0 10px 40px rgba(137,87,229,.15); }
+  .vs-card.claude { border-color: rgba(209,139,91,.5); }
+  .vs-head { font-weight: 700; font-size: 1.15rem; margin-bottom: 10px; }
+  .vs-card.copilot .vs-head { color: #c9b2ff; }
+  .vs-card.claude .vs-head { color: #e3a57c; }
+  .vs-card ul { list-style: none; margin: 0; padding: 0; }
+  .vs-card li { padding: 10px 0; border-top: 1px solid var(--border); font-size: .93rem; color: var(--muted); }
+  .vs-card li b { display: block; color: var(--text); font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+  .vs-mid { align-self: center; color: var(--muted); font-weight: 700; }
+  @media (max-width: 820px) { .vs-grid { grid-template-columns: 1fr; } .vs-mid { text-align: center; } }
+  .btn { display: inline-block; padding: 12px 22px; border-radius: 10px; font-weight: 600; text-decoration: none; margin-right: 10px; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text); }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 48px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .stat b { display: block; font-size: 1.8rem; color: #fff; }
+  .stat span { color: var(--muted); font-size: .9rem; }
+  @media (max-width: 820px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+  /* Cards */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 32px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 32px; }
+  @media (max-width: 900px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .card p { color: var(--muted); font-size: .95rem; }
+  .card .tag { display: inline-block; font-size: .72rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: rgba(137,87,229,.18); color: #c9b2ff; margin-bottom: 10px; }
+
+  /* HydraFusion */
+  .hf { background: linear-gradient(180deg, rgba(137,87,229,.10), transparent 70%); }
+  .pattern { position: relative; }
+  .pattern .num { font-size: .8rem; color: var(--accent); font-weight: 700; }
+  .bench { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: .95rem; }
+  .bench th, .bench td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+  .bench th { color: var(--muted); font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; }
+  .good { color: var(--green); font-weight: 600; }
+  .neutral { color: var(--amber); font-weight: 600; }
+  .preview-badge { display: inline-block; border: 1px solid var(--amber); color: var(--amber); font-size: .75rem; padding: 2px 10px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+
+  /* Comparison table */
+  .cmp { width: 100%; border-collapse: collapse; margin-top: 28px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .cmp th, .cmp td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: top; text-align: left; font-size: .95rem; }
+  .cmp thead th { background: var(--panel-2); font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .cmp td:first-child { font-weight: 600; width: 22%; }
+  .cmp td:nth-child(2) { color: var(--text); }
+  .cmp td:nth-child(3) { color: var(--muted); }
+  .cmp tr:last-child td { border-bottom: none; }
+
+  /* Bars */
+  .bars { margin-top: 24px; }
+  .bar-row { display: grid; grid-template-columns: 170px 1fr 80px; align-items: center; gap: 12px; margin: 7px 0; font-size: .92rem; }
+  .bar-track { background: var(--panel-2); border-radius: 6px; height: 16px; overflow: hidden; }
+  .bar { height: 100%; border-radius: 6px; background: var(--accent-2); }
+  .bar.claude { background: #d18b5b; }
+  .bar-row .val { text-align: right; font-variant-numeric: tabular-nums; }
+  .legend { display: flex; gap: 18px; font-size: .85rem; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  @media (max-width: 600px) { .bar-row { grid-template-columns: 120px 1fr 60px; font-size: .82rem; } }
+
+  /* Tiers */
+  .tiers { width: 100%; border-collapse: collapse; margin-top: 18px; }
+  .tiers th, .tiers td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; font-size: .95rem; }
+  .tiers th { color: var(--muted); font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; }
+
+  .callout { border-left: 3px solid var(--accent); background: var(--panel); padding: 16px 20px; border-radius: 0 10px 10px 0; margin-top: 24px; }
+  .check li { margin: 6px 0; }
+  ul.check { padding-left: 20px; color: var(--muted); }
+  ul.check b { color: var(--text); }
+
+  footer { border-top: 1px solid var(--border); padding: 40px 0 60px; color: var(--muted); font-size: .82rem; }
+  footer ol { padding-left: 18px; }
+  footer li { margin: 4px 0; }
+
+  /* Worked example */
+  .ex-controls { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-end; margin: 26px 0 10px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; font-size: .9rem; color: var(--muted); }
+  .ex-controls label { display: flex; flex-direction: column; gap: 6px; }
+  .ex-controls b { color: var(--text); }
+  .ex-controls select { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+  .ex-controls input[type=range] { width: 170px; accent-color: var(--accent); }
+  .ex-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+  @media (max-width: 900px) { .ex-grid { grid-template-columns: 1fr; } }
+  .ex-col { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .ex-col.copilot { border-color: var(--accent); box-shadow: 0 10px 40px rgba(137,87,229,.12); }
+  .ex-col.claude { border-color: rgba(209,139,91,.5); }
+  .ex-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
+  .ex-title span { display: block; font-weight: 400; font-size: .82rem; color: var(--muted); }
+  .ex-col.claude .ex-title { color: #e3a57c; }
+  .ex-col.copilot .ex-title { color: #c9b2ff; }
+  .ex-lane { display: grid; grid-template-columns: 92px 18px 1fr 84px; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--border); }
+  .ex-tier { font-weight: 600; font-size: .92rem; }
+  .ex-tier small, .ex-model small { display: block; font-weight: 400; color: var(--muted); font-size: .76rem; }
+  .ex-arrow { color: var(--muted); }
+  .ex-model { border-radius: 8px; padding: 7px 10px; font-size: .9rem; font-weight: 600; }
+  .ex-model.c { background: rgba(209,139,91,.14); border: 1px solid rgba(209,139,91,.4); }
+  .ex-model.g { background: rgba(47,129,247,.12); border: 1px solid rgba(47,129,247,.4); }
+  .ex-cost { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .ex-total { display: flex; justify-content: space-between; border-top: 2px solid var(--border); padding-top: 12px; margin-top: 4px; color: var(--muted); }
+  .ex-total b { color: var(--text); font-size: 1.2rem; }
+  .ex-result { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 22px; }
+  .ex-result > div { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .ex-result b { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+  @media (max-width: 820px) { .ex-result { grid-template-columns: repeat(2, 1fr); } }
+  .ex-bars { margin-top: 18px; }
+  .ex-bars .bar { transition: width .3s ease; }
+
+  .info { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 4px; border-radius: 50%; border: 1px solid var(--muted); color: var(--muted); font: italic 700 11px Georgia, serif; cursor: help; vertical-align: 1px; }
+  .info:hover, .info:focus { color: var(--text); border-color: var(--accent); outline: none; }
+  .info-tip { visibility: hidden; opacity: 0; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); width: 260px; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font: 400 .82rem/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-style: normal; text-align: left; box-shadow: 0 8px 24px rgba(0,0,0,.4); z-index: 20; transition: opacity .15s; }
+  .info-tip { display: none; max-width: 70vw; }
+  .info:hover .info-tip, .info:focus .info-tip { display: block; visibility: visible; opacity: 1; }
+  .ex-std .info-tip { left: auto; right: -8px; transform: none; }
+  @media (max-width: 600px) { .info-tip { left: 0; transform: none; width: 220px; } }
+
+  /* Quality flow */
+  .flow { display: flex; align-items: stretch; gap: 8px; margin-top: 30px; flex-wrap: wrap; }
+  .flow-step { flex: 1 1 150px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .flow-step b { display: block; font-size: .95rem; }
+  .flow-step small { color: var(--muted); font-size: .8rem; }
+  .flow-step.done { border-color: var(--green); }
+  .flow-n { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(137,87,229,.25); color: #c9b2ff; font-size: .78rem; font-weight: 700; margin-bottom: 6px; }
+  .flow-step.done .flow-n { background: rgba(63,185,80,.2); color: var(--green); }
+  .flow-arrow { align-self: center; color: var(--muted); }
+  @media (max-width: 900px) { .flow-arrow { display: none; } }
+  .tag.lic-in { background: rgba(63,185,80,.15); color: #7ee2a8; }
+  .tag.lic-add { background: rgba(210,153,34,.15); color: #e3b341; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">Customer <span>×</span> GitHub Copilot</div>
+    <ul>
+      <li><a href="#why">Why AI-agnostic</a></li>
+      <li><a href="#hydrafusion">HydraFusion</a></li>
+      <li><a href="#example">Example</a></li>
+      <li><a href="#compare">Comparison</a></li>
+      <li><a href="#cost">Cost</a></li>
+      <li><a href="#quality">Quality</a></li>
+      <li><a href="#enterprise">Enterprise</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">GitHub Copilot vs. Claude · For Customer engineering leadership</div>
+    <h1><span class="gh">GitHub Copilot</span> <span class="vs">vs.</span> <span class="cl">Claude</span></h1>
+    <p class="h1-sub">Every frontier model on one governed platform, or one model vendor.</p>
+    <p class="lead">GitHub Copilot runs Claude alongside OpenAI, Google, Microsoft and other models, across the whole software lifecycle, under your existing Microsoft agreement. With HydraFusion, it can combine models on a single task to balance quality and cost.</p>
+
+    <div class="vs-grid">
+      <div class="vs-card copilot">
+        <div class="vs-head">GitHub Copilot</div>
+        <ul>
+          <li><b>Models</b>30+ models from 6+ providers, Claude included, plus Auto and HydraFusion</li>
+          <li><b>Lifecycle</b>Plan, code, review, secure and deploy on one platform</li>
+          <li><b>Cost</b>$19 seat includes AI credits, pooled org-wide. Low-cost models from $0.10 per 1M input tokens</li>
+          <li><b>Enterprise</b>One IP indemnity across all models, audit logs, draws down MACC</li>
+        </ul>
+      </div>
+      <div class="vs-mid">vs.</div>
+      <div class="vs-card claude">
+        <div class="vs-head">Claude</div>
+        <ul>
+          <li><b>Models</b>Anthropic models only (Opus, Sonnet, Haiku)</li>
+          <li><b>Lifecycle</b>Strongest in the coding loop. The rest depends on your integrations</li>
+          <li><b>Cost</b>Claude Code: about $150 to $250 per developer per month (Anthropic estimate). Cheapest model starts at $1 per 1M input tokens</li>
+          <li><b>Enterprise</b>Separate Anthropic contract and bill, outside MACC</li>
+        </ul>
+      </div>
+    </div>
+    <p class="src" style="margin-top:10px">Sources: <a href="https://code.claude.com/docs/en/costs">Anthropic, Claude Code costs</a>; GitHub Copilot vs. Claude compete analysis, Sept 2026.</p>
+
+    <a class="btn btn-primary" href="#compare">See the full comparison</a>
+    <a class="btn btn-ghost" href="#cost">See the cost model</a>
+
+    <div class="stats">
+      <div class="stat"><b>30+</b><span>models from 6+ providers in one subscription, Claude included</span></div>
+      <div class="stat"><b>$19</b><span>Business seat includes $19 of AI credits, pooled across the org</span></div>
+      <div class="stat"><b>up to 67%</b><span>lower estimated cost vs. Claude Opus 5 with HydraFusion (benchmark, preview)</span></div>
+      <div class="stat"><b>1</b><span>bill, on your Microsoft agreement (MACC)</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- WHY AI-AGNOSTIC -->
+<section id="why">
+  <div class="wrap">
+    <div class="eyebrow">Why an AI-agnostic approach</div>
+    <h2>The best model changes every few months. Your platform shouldn't have to.</h2>
+    <p class="lead">A year ago the default was Cursor. Today many teams talk about Claude. Next year it could be another provider. Standardizing on a single model vendor ties your developer tooling, contracts and cost structure to one roadmap.</p>
+    <div class="grid-3">
+      <div class="card">
+        <span class="tag">Choice</span>
+        <h3>Pick the model per task</h3>
+        <p>Claude Opus, Sonnet and Haiku run natively in Copilot next to GPT, Gemini, MAI, Grok and Kimi. New models often land on day one. Auto mode can pick one for you.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Continuity</span>
+        <h3>Nothing to unlearn</h3>
+        <p>CLAUDE.md, AGENTS.md and MCP servers carry over. Teams that like Claude keep using Claude, now inside a governed platform.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Economics</span>
+        <h3>Match cost to the work</h3>
+        <p>Send routine, high-volume work to low-cost models and save frontier models for the hard problems. A single-vendor tool can only move you up and down one price ladder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HYDRAFUSION -->
+<section id="hydrafusion" class="hf">
+  <div class="wrap">
+    <div class="eyebrow">Powered by HydraFusion</div>
+    <h2>From choosing a model to orchestrating several <span class="preview-badge">Research preview</span></h2>
+    <p class="lead">HydraFusion is GitHub Copilot's runtime orchestration layer. You select it like any other model. For each request it builds an execution plan across models from multiple providers, using extra model calls only when they're likely to improve the result. <a href="https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/">GitHub Blog</a></p>
+
+    <div class="grid-3">
+      <div class="card pattern">
+        <div class="num">PATTERN 1</div>
+        <h3>Single</h3>
+        <p>One model solves the task directly. Fastest and cheapest when one model is a clear fit.</p>
+      </div>
+      <div class="card pattern">
+        <div class="num">PATTERN 2</div>
+        <h3>Cascade</h3>
+        <p>An efficient model drafts first. A quality gate accepts the result or escalates to a stronger model.</p>
+      </div>
+      <div class="card pattern">
+        <div class="num">PATTERN 3</div>
+        <h3>Critique</h3>
+        <p>One model drafts, a critic from a different model family reviews it read-only, and the drafter revises once.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Benchmark results vs. Claude Opus 5</h3>
+        <table class="bench">
+          <thead><tr><th>Benchmark</th><th>Est. cost</th><th>Quality</th></tr></thead>
+          <tbody>
+            <tr><td>TerminalBench 2.1</td><td class="good">67% lower</td><td class="good">+4.9 pts</td></tr>
+            <tr><td>DeepSWE</td><td class="good">36% lower</td><td class="neutral">-1.5 pts</td></tr>
+            <tr><td>CheckpointBench</td><td class="good">65% lower</td><td class="neutral">-0.1 pts</td></tr>
+          </tbody>
+        </table>
+        <p class="src" style="margin-top:12px">Offline evaluations, best tuned configuration, medium reasoning for all models. Results are specific to the benchmark revisions, model pool and pricing assumptions used. <a href="https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/">Source</a></p>
+      </div>
+      <div class="card">
+        <h3>Built for repository-level work</h3>
+        <ul class="check">
+          <li><b>Complete accounting.</b> Cost is tracked across every leg: draft, critique, revision, escalation, retry.</li>
+          <li><b>Bounded execution.</b> Each leg has explicit timeout and cancellation limits.</li>
+          <li><b>Isolated review.</b> Critics run tool-less and can't modify the repo.</li>
+          <li><b>Fail-safe.</b> No patch is applied if the workflow fails validation.</li>
+          <li><b>Pay for what runs.</b> Billing follows the tokens each model actually uses.</li>
+        </ul>
+        <p class="src">Available as an opt-in preview in Copilot CLI. Behavior and availability may change. <a href="https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/">Source</a></p>
+      </div>
+    </div>
+    <div class="callout">
+      <b>Why this matters for Customer:</b> HydraFusion only works because Copilot has access to many model families. A Claude-only tool can't draft on one vendor's model and critique with another's.
+    </div>
+  </div>
+</section>
+
+<!-- WORKED EXAMPLE -->
+<section id="example">
+  <div class="wrap">
+    <div class="eyebrow">Worked example</div>
+    <h2>One month of agent work, two model paths</h2>
+    <p class="lead">A team runs agent tasks of mixed difficulty. Claude Code sends every task to a Claude model. Copilot sends each task to the best-value model for its difficulty, and Claude is still one of the options.</p>
+
+    <div class="ex-controls">
+      <label>Tasks per month
+        <select id="ex-volume">
+          <option value="1000">1,000</option>
+          <option value="10000" selected>10,000</option>
+          <option value="100000">100,000</option>
+        </select>
+      </label>
+      <label><span>Routine share <span class="info" tabindex="0" role="button" aria-label="More info">i<span class="info-tip" role="tooltip">Share of tasks that are small and repetitive: code lookups, explaining a function, writing unit tests, fixing lint errors, small refactors, boilerplate. A lightweight model handles these well.</span></span></span><b id="ex-r-val">60%</b>
+        <input type="range" id="ex-r" min="0" max="100" step="5" value="60">
+      </label>
+      <label><span>Hard share <span class="info" tabindex="0" role="button" aria-label="More info">i<span class="info-tip" role="tooltip">Share of tasks that need deep reasoning: architecture decisions, cross-service changes, tricky debugging, security-sensitive or large multi-file work. These go to a frontier model.</span></span></span><b id="ex-h-val">10%</b>
+        <input type="range" id="ex-h" min="0" max="100" step="5" value="10">
+      </label>
+      <span class="ex-std">Standard share <span class="info" tabindex="0" role="button" aria-label="More info">i<span class="info-tip" role="tooltip">Whatever remains: everyday feature work, such as adding an endpoint, building a UI component or fixing a typical bug. It updates automatically so the three shares add up to 100%.</span></span>: <b id="ex-s-val">30%</b></span>
+    </div>
+
+    <div class="ex-grid">
+      <div class="ex-col claude">
+        <div class="ex-title">Claude Code<span>Anthropic models only</span></div>
+        <div class="ex-lane"><div class="ex-tier">Routine<small id="c-n0"></small></div><div class="ex-arrow">→</div><div class="ex-model c">Claude Haiku 4.5<small>$0.253 / task</small></div><div class="ex-cost" id="c-c0"></div></div>
+        <div class="ex-lane"><div class="ex-tier">Standard<small id="c-n1"></small></div><div class="ex-arrow">→</div><div class="ex-model c">Claude Sonnet 5.5<small>$0.506 / task</small></div><div class="ex-cost" id="c-c1"></div></div>
+        <div class="ex-lane"><div class="ex-tier">Hard<small id="c-n2"></small></div><div class="ex-arrow">→</div><div class="ex-model c">Claude Opus 5.5<small>$0.813 / task</small></div><div class="ex-cost" id="c-c2"></div></div>
+        <div class="ex-total">Monthly model cost <b id="c-total"></b></div>
+      </div>
+
+      <div class="ex-col copilot">
+        <div class="ex-title">GitHub Copilot<span>Routed across providers</span></div>
+        <div class="ex-lane"><div class="ex-tier">Routine<small id="g-n0"></small></div><div class="ex-arrow">→</div><div class="ex-model g">MAI-Code-1.1-Flash<small>Microsoft · $0.053 / task</small></div><div class="ex-cost" id="g-c0"></div></div>
+        <div class="ex-lane"><div class="ex-tier">Standard<small id="g-n1"></small></div><div class="ex-arrow">→</div><div class="ex-model g">Gemini 3.8 Flash<small>Google · $0.190 / task</small></div><div class="ex-cost" id="g-c1"></div></div>
+        <div class="ex-lane"><div class="ex-tier">Hard<small id="g-n2"></small></div><div class="ex-arrow">→</div><div class="ex-model g">GPT-6.1 Sol<small>OpenAI · $0.406 / task</small></div><div class="ex-cost" id="g-c2"></div></div>
+        <div class="ex-total">Monthly model cost <b id="g-total"></b></div>
+      </div>
+    </div>
+
+    <div class="ex-result">
+      <div><span class="muted small">Claude Code</span><b id="r-claude"></b></div>
+      <div><span class="muted small">GitHub Copilot</span><b id="r-copilot" class="good"></b></div>
+      <div><span class="muted small">Saved per month</span><b id="r-saved" class="good"></b></div>
+      <div><span class="muted small">Saved per year</span><b id="r-year" class="good"></b></div>
+    </div>
+    <div class="ex-bars">
+      <div class="bar-row"><span>Claude Code</span><div class="bar-track"><div class="bar claude" id="b-claude"></div></div><span class="val" id="b-claude-v"></span></div>
+      <div class="bar-row"><span>GitHub Copilot</span><div class="bar-track"><div class="bar" id="b-copilot"></div></div><span class="val" id="b-copilot-v"></span></div>
+    </div>
+
+    <h3 style="margin-top:44px">The same path, with governance on every step</h3>
+    <table class="cmp">
+      <thead><tr><th>Control</th><th>GitHub Copilot path</th><th>Claude Code path</th></tr></thead>
+      <tbody>
+        <tr><td>Which models are allowed</td><td>Admins enable or block each model through org policy</td><td>Anthropic models only, managed in a separate Anthropic admin console</td></tr>
+        <tr><td>What agents did</td><td>Agent audit logs in GitHub, next to PRs, reviews and checks</td><td>Logged outside your GitHub and Microsoft controls</td></tr>
+        <tr><td>Data and IP</td><td>No training on or retention of code (Business/Enterprise). One IP indemnity covers all models, Claude included</td><td>Set by your Anthropic contract</td></tr>
+        <tr><td>Quality gate</td><td>Agent output goes through the same PRs, code review, code scanning and Autofix</td><td>Depends on your own integrations</td></tr>
+        <tr><td>Billing</td><td>One Microsoft bill, draws down MACC, pooled seat credits</td><td>Separate Anthropic contract, outside MACC</td></tr>
+      </tbody>
+    </table>
+
+    <p class="src" style="margin-top:14px">Per-task costs come from a real agent session that implemented a feature end to end (about 1.08M input tokens, 92% cached, 13.4K output, 28 turns), priced at list rates with cache-write charges excluded for all providers. The model pairs follow the deck's routine, standard and hard tiers. The example assumes every task uses that same token budget, and the task mix is illustrative, so adjust it to match Customer. Negotiated discounts and seat credits aren't included. Source: GitHub Copilot vs. Claude compete analysis, Sept 2026.</p>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="compare">
+  <div class="wrap">
+    <div class="eyebrow">Side by side</div>
+    <h2>GitHub Copilot vs. Claude</h2>
+    <p class="lead">Both tools run capable agents. The difference is what surrounds the model: lifecycle coverage, reach, governance and commercial terms.</p>
+
+    <table class="cmp">
+      <thead><tr><th>Area</th><th>GitHub Copilot</th><th>Claude</th></tr></thead>
+      <tbody>
+        <tr><td>Models</td><td>30+ models from Anthropic, OpenAI, Google, Microsoft, xAI, Moonshot, plus Auto mode, HydraFusion and bring-your-own-key</td><td>Anthropic models only (Opus, Sonnet, Haiku)</td></tr>
+        <tr><td>Lifecycle coverage</td><td>Plan, code, review, test and secure, deploy, operate: Issues, agent mode, coding agent, PR code review, Autofix, Actions</td><td>Strongest in the coding loop. Planning, review, CI/CD and security rely on your own integrations</td></tr>
+        <tr><td>Where developers work</td><td>VS Code, Visual Studio, JetBrains, Eclipse, Xcode, Neovim, GitHub.com, mobile, CLI, desktop app</td><td>Separate CLI, desktop and web apps, plus VS Code and JetBrains</td></tr>
+        <tr><td>Repositories</td><td>GitHub, Azure DevOps, GitLab, Bitbucket</td><td>Works on local checkouts; platform features depend on integrations</td></tr>
+        <tr><td>Agent efficiency</td><td>On-par task resolution with fewer tokens across most tested configurations, on Claude's own models (<a href="#fn-harness">source</a>)</td><td>Tuned for Claude models by the model maker</td></tr>
+        <tr><td>Governance</td><td>Org policy, agent audit logs, content filters, CLI sandboxing on all supported OSs</td><td>Managed separately from your GitHub and Microsoft controls</td></tr>
+        <tr><td>IP and data</td><td>No training on or retention of your code (Business/Enterprise). One IP indemnity across all models, Claude included</td><td>Terms set by your Anthropic contract</td></tr>
+        <tr><td>Commercial</td><td>Seat includes AI credits, pooled org-wide. Draws down MACC. One Microsoft bill</td><td>Separate Anthropic contract and bill, outside MACC</td></tr>
+      </tbody>
+    </table>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Where Claude is strong</h3>
+        <p>Claude models are strong at deep multi-file agentic work, and Claude Code, its CLI, is fast and scriptable for power users who live in the terminal. Claude has real momentum with AI-forward teams, and for a single developer happy with one model vendor, it's a good choice.</p>
+      </div>
+      <div class="card">
+        <h3>Why Copilot fits the enterprise</h3>
+        <p>When you're standardizing hundreds of developers, the questions shift to governance, spend control and lock-in. Copilot has the Copilot CLI for terminal users, runs the same Claude models, and adds the platform, controls and commercial terms around them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COST -->
+<section id="cost">
+  <div class="wrap">
+    <div class="eyebrow">Financial comparison</div>
+    <h2>Same task, very different cost</h2>
+    <p class="lead">One real agent session implementing a feature end to end (about 1.08M input tokens, 92% cached, 13.4K output, 28 turns), repeated 1,000 times at list price.</p>
+
+    <div class="bars">
+      <div class="bar-row"><span>Claude Opus 5.5</span><div class="bar-track"><div class="bar claude" style="width:100%"></div></div><span class="val">$813</span></div>
+      <div class="bar-row"><span>Claude Sonnet 5.5</span><div class="bar-track"><div class="bar claude" style="width:62.2%"></div></div><span class="val">$506</span></div>
+      <div class="bar-row"><span>GPT-6.1 Sol</span><div class="bar-track"><div class="bar" style="width:49.9%"></div></div><span class="val">$406</span></div>
+      <div class="bar-row"><span>Claude Haiku 4.5</span><div class="bar-track"><div class="bar claude" style="width:31.1%"></div></div><span class="val">$253</span></div>
+      <div class="bar-row"><span>Gemini 3.8 Flash</span><div class="bar-track"><div class="bar" style="width:23.4%"></div></div><span class="val">$190</span></div>
+      <div class="bar-row"><span>MAI-Code-1.1-Flash</span><div class="bar-track"><div class="bar" style="width:6.5%"></div></div><span class="val">$53</span></div>
+      <div class="bar-row"><span>GPT-6 Luna</span><div class="bar-track"><div class="bar" style="width:3.1%"></div></div><span class="val">$25</span></div>
+      <div class="legend"><span><i style="background:#d18b5b"></i>Available in Claude and Copilot</span><span><i style="background:var(--accent-2)"></i>Available only in Copilot</span></div>
+      <p class="src" style="margin-top:10px">List price, default tier, excluding cache-write charges for all providers. Copilot billing: 1 AI credit = $0.01. Gemini 3.8 Flash pricing is promotional through Dec 31, 2026. Source: GitHub Copilot vs. Claude compete analysis, Sept 2026.</p>
+    </div>
+
+    <h3 style="margin-top:48px">Every cabin class, more than one airline</h3>
+    <p class="muted">Claude gives you Anthropic's price at every level of difficulty. Copilot lets you shop each level across providers, and still use Claude where it's the best fit.</p>
+    <table class="tiers">
+      <thead><tr><th>Type of work</th><th>Claude (input $/1M tokens)</th><th>Copilot option (input $/1M tokens)</th></tr></thead>
+      <tbody>
+        <tr><td>Routine lookups, high volume</td><td>Claude Haiku 4.5 · $1.00</td><td>MAI-Code-1.1-Flash · $0.20</td></tr>
+        <tr><td>Standard feature work</td><td>Claude Sonnet 5.5 · $2.00</td><td>Gemini 3.8 Flash · $0.75</td></tr>
+        <tr><td>Hard architecture calls</td><td>Claude Opus 5.5 · $4.00</td><td>GPT-6.1 Sol · $2.00</td></tr>
+      </tbody>
+    </table>
+    <p class="src">List prices per 1M input tokens. Source: GitHub Copilot vs. Claude compete analysis, Sept 2026.</p>
+
+    <h3 style="margin-top:48px">Where Claude can cost more at scale</h3>
+    <div class="grid-2">
+      <div class="card">
+        <h3>A higher price floor</h3>
+        <p>The cheapest Claude option is Haiku 4.5 at $1 input / $5 output per 1M tokens. Copilot's low-cost tier starts at $0.20 / $1.20 (MAI-Code-1.1-Flash) or $0.10 / $0.50 (GPT-6 Luna). At thousands of daily agent runs, that gap compounds.</p>
+      </div>
+      <div class="card">
+        <h3>Heavy use adds up</h3>
+        <p>Anthropic estimates Claude Code at about $13 per active developer-day, roughly $150 to $250 per developer per month for typical use. <a href="https://code.claude.com/docs/en/costs">Anthropic docs</a></p>
+      </div>
+      <div class="card">
+        <h3>No pooling across users</h3>
+        <p>Each Copilot Business seat includes 1,900 AI credits ($19 of usage) for any model, pooled across teams and cost centers. Heavy users draw on capacity light users don't consume, so less is stranded.</p>
+      </div>
+      <div class="card">
+        <h3>A second contract to manage</h3>
+        <p>Claude is billed directly by Anthropic, outside your Microsoft commitment. Copilot seats and overage draw down MACC on one Microsoft bill, with your existing Azure discount terms applying.</p>
+      </div>
+    </div>
+    <div class="callout">
+      Actual savings depend on Customer's model mix, usage volume and contract terms. We recommend a short pilot that tracks token usage by model to size the difference with your own data.
+    </div>
+  </div>
+</section>
+
+<!-- QUALITY -->
+<section id="quality">
+  <div class="wrap">
+    <div class="eyebrow">After the code is written</div>
+    <h2>Faster code needs faster review</h2>
+    <p class="lead">AI agents write code faster than teams can review it, so review and quality checks become the bottleneck. On GitHub, every pull request from an agent goes through the same review, quality gates and security checks as code from your developers, inside the platform where your PRs already live.</p>
+
+    <div class="flow">
+      <div class="flow-step"><span class="flow-n">1</span><b>Agent opens a PR</b><small>Copilot coding agent or a developer</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="flow-n">2</span><b>Copilot code review</b><small>Inline comments and suggested fixes</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="flow-n">3</span><b>Code Quality gate</b><small>Maintainability, reliability, coverage</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="flow-n">4</span><b>Security scanning</b><small>Code and secret scanning with Autofix</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step done"><span class="flow-n">✓</span><b>Merge</b><small>Human approves, audit trail kept</small></div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <span class="tag lic-in">Uses Copilot AI credits</span>
+        <h3>Copilot code review</h3>
+        <p>Copilot reviews the pull request in minutes and leaves inline comments with suggested changes. You can request it on a PR or run it automatically on every PR with rulesets.</p>
+        <p><b style="color:var(--text)">For developers:</b> first-pass feedback arrives right away. Human reviewers spend their time on design and logic, not nitpicks.</p>
+      </div>
+      <div class="card">
+        <span class="tag lic-add">Add-on · $10 per active committer / month + AI usage</span>
+        <h3>GitHub Code Quality</h3>
+        <p>Combines CodeQL analysis with AI detection to flag maintainability and reliability issues in the PR, with one-click Copilot Autofix. Also adds org-wide quality scores, test coverage shown on each PR, and merge gates you can run in evaluate mode first.</p>
+        <p><b style="color:var(--text)">For developers:</b> GitHub's own teams resolve 67.3% of findings before merging. <a href="https://github.blog/changelog/2026-07-20-github-code-quality-is-now-generally-available/">Changelog</a></p>
+      </div>
+      <div class="card">
+        <span class="tag lic-add">Add-on · GitHub Advanced Security</span>
+        <h3>Code scanning, secret scanning and Autofix</h3>
+        <p>Finds security vulnerabilities and leaked secrets in the pull request, and Copilot Autofix proposes a fix in the same place. Push protection blocks secrets before they reach the repository.</p>
+        <p><b style="color:var(--text)">For developers:</b> security issues get fixed while the code is fresh, not weeks later from a ticket.</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="callout" style="margin-top:0">
+        <b>Pricing note.</b> Code Quality and Advanced Security are separate paid products. They aren't part of the model cost example above, so those savings are model-only. Code Quality doesn't need a Copilot subscription, runs on GitHub Enterprise Cloud and Team, and isn't available on GitHub Enterprise Server. <a href="https://github.blog/changelog/2026-07-20-github-code-quality-is-now-generally-available/">Source</a>
+      </div>
+      <div class="callout" style="margin-top:0">
+        <b>How this compares with Claude.</b> Anthropic offers its own options for reviewing code with Claude. The difference is where the checks run: on GitHub, review, quality gates, security scanning, org policy and audit logs are native to the platform that hosts your PRs, so there's nothing extra to connect or govern.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENTERPRISE -->
+<section id="enterprise">
+  <div class="wrap">
+    <div class="eyebrow">Built for the enterprise</div>
+    <h2>Governance, security and the Microsoft ecosystem</h2>
+    <div class="grid-3">
+      <div class="card">
+        <span class="tag">Governance</span>
+        <h3>Controls in one place</h3>
+        <p>Org-level model and feature policies, agent audit logs, content filters and CLI sandboxing. Agents work through the same repos, pull requests, pipelines and checks as your developers, so AI-written code meets the same bar.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Security and IP</span>
+        <h3>Your code stays yours</h3>
+        <p>Copilot Business and Enterprise don't train on or retain your code. GitHub's zero-retention agreement with Anthropic covers Claude models in Copilot, and one IP indemnity applies across every model. GitHub Advanced Security, secret scanning and Copilot Autofix sit in the same workflow.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Microsoft and Azure</span>
+        <h3>Fits your existing agreement</h3>
+        <p>Consumption draws down your Microsoft Azure Consumption Commitment. Connects to Microsoft Foundry, Defender for Cloud and Azure SRE Agent, and works with Azure DevOps repos.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:48px">Running Claude models: three options</h3>
+    <table class="cmp">
+      <thead><tr><th>Option</th><th>What you keep</th><th>Trade-off</th></tr></thead>
+      <tbody>
+        <tr><td>Claude natively in Copilot <span class="good">(recommended)</span></td><td>Full agent harness on every surface including the cloud coding agent, org policy and audit logs, zero retention, Copilot IP indemnity, included credits, MACC</td><td>None of the below</td></tr>
+        <tr><td>Bring your own key via Microsoft Foundry</td><td>Works in IDE, CLI and the Copilot app. Draws MACC. Foundry governs the endpoint</td><td>Foundry terms apply instead of Copilot's copyright commitment. Cloud coding agent stays on built-in models</td></tr>
+        <tr><td>Bring your own key via Anthropic API</td><td>Works in IDE, CLI and the Copilot app</td><td>Keys are self-managed and bypass Copilot filters. No GitHub or Microsoft indemnity. Billed outside MACC</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Next step</div>
+    <h2>See it with Customer's own workloads</h2>
+    <p class="lead">We'll run a session on the agentic SDLC: Claude and other models side by side in Copilot, HydraFusion on a real task from your backlog, and a cost model based on your developer count and usage.</p>
+    <a class="btn btn-primary" href="mailto:?subject=GitHub%20Copilot%20agentic%20SDLC%20session">Book a session</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><b>Sources and notes</b></p>
+    <ol>
+      <li>HydraFusion architecture, patterns and benchmark results: <a href="https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/">Project HydraFusion, The GitHub Blog</a>. Research preview; results, models and availability may change.</li>
+      <li id="fn-harness">Harness efficiency: The GitHub Blog, "Evaluating performance and efficiency of the GitHub Copilot agentic harness across models and tasks" (2026). Compared against Claude Code on Sonnet 4.6 / Opus 4.7, within run-to-run variance.</li>
+      <li>Claude Code usage cost estimate: <a href="https://code.claude.com/docs/en/costs">Anthropic, Claude Code costs</a>.</li>
+      <li>Model list prices, per-task cost example, seat credits and platform capabilities: GitHub Copilot vs. Claude compete analysis, 30 September 2026. List prices exclude cache-write charges and don't reflect negotiated discounts.</li>
+      <li>Claude Fable 5.1 is excluded from cost comparisons. Anthropic retains prompts and outputs for that model by default; zero data retention is available only by approved exemption through Dec 31, 2026.</li>
+    </ol>
+    <p>Model names, prices and availability current as of September 2026.</p>
+  </div>
+</footer>
+
+
+<script>
+(function () {
+  const claude = [0.253, 0.506, 0.813];
+  const copilot = [0.053, 0.190, 0.406];
+  const $ = id => document.getElementById(id);
+  const usd = n => '$' + Math.round(n).toLocaleString('en-US');
+  function update(changed) {
+    let r = +$('ex-r').value, h = +$('ex-h').value;
+    if (r + h > 100) { if (changed === 'r') { h = 100 - r; $('ex-h').value = h; } else { r = 100 - h; $('ex-r').value = r; } }
+    const s = 100 - r - h, vol = +$('ex-volume').value;
+    $('ex-r-val').textContent = r + '%'; $('ex-h-val').textContent = h + '%'; $('ex-s-val').textContent = s + '%';
+    const n = [r, s, h].map(p => vol * p / 100);
+    let ct = 0, gt = 0;
+    n.forEach((k, i) => {
+      const c = k * claude[i], g = k * copilot[i]; ct += c; gt += g;
+      const lbl = k.toLocaleString('en-US') + ' tasks';
+      $('c-n' + i).textContent = lbl; $('g-n' + i).textContent = lbl;
+      $('c-c' + i).textContent = usd(c); $('g-c' + i).textContent = usd(g);
+    });
+    $('c-total').textContent = usd(ct); $('g-total').textContent = usd(gt);
+    $('r-claude').textContent = usd(ct); $('r-copilot').textContent = usd(gt);
+    const pct = ct ? Math.round((1 - gt / ct) * 100) : 0;
+    $('r-saved').textContent = usd(ct - gt) + ' (' + pct + '%)';
+    $('r-year').textContent = usd((ct - gt) * 12);
+    $('b-claude').style.width = ct ? '100%' : '0'; $('b-copilot').style.width = ct ? (gt / ct * 100) + '%' : '0';
+    $('b-claude-v').textContent = usd(ct); $('b-copilot-v').textContent = usd(gt);
+  }
+  $('ex-r').addEventListener('input', () => update('r'));
+  $('ex-h').addEventListener('input', () => update('h'));
+  $('ex-volume').addEventListener('change', () => update());
+  update();
+})();
+</script>
+</body>
+</html>
